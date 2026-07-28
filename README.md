@@ -17,7 +17,7 @@ I build systems that turn real-time signals into useful software. My work spans 
 
 I am especially interested in dependable embedded intelligence: on-device adaptation, multimodal sensor fusion, real-time inference, and hardware-software co-design under power and memory constraints.
 
-I am building [Inoculate](https://inoculate.dev), a developer tool that extracts a reference site's visual system, interaction patterns, and motion behavior into structured design context for AI coding agents.
+Currently building [Inoculate](https://inoculate.dev), a developer tool that extracts a reference site's visual system, interaction patterns, and motion behavior into structured design context for AI coding agents.
 
 ## Selected systems
 
