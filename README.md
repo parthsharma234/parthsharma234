@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://media1.giphy.com/media/lOF0rb0fdtGBOvgdO3/giphy.gif" alt="Drone in flight" width="520" />
+  <img src="assets/live-wires.gif" alt="Animated live data wires" width="900" />
 </p>
 
 <h1 align="center">Parth Sharma</h1>
@@ -16,6 +16,8 @@
 I build systems that turn real-time signals into useful software. My work spans voice-interaction pipelines, event intelligence, and embedded instrumentation; most recently, I contributed to a magnetometer payload that flew on a NASA Student Launch rocket.
 
 I am especially interested in dependable embedded intelligence: on-device adaptation, multimodal sensor fusion, real-time inference, and hardware-software co-design under power and memory constraints.
+
+I am building [Inoculate](https://inoculate.dev), a developer tool that extracts a reference site's visual system, interaction patterns, and motion behavior into structured design context for AI coding agents.
 
 ## Selected systems
 
