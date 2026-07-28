@@ -1,14 +1,14 @@
 """Card representations for blackjack."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 
 class Suit(Enum):
-    HEARTS = "♥"
-    DIAMONDS = "♦"
-    CLUBS = "♣"
-    SPADES = "♠"
+    """ASCII suit codes keep GitHub issue tables portable."""
+    HEARTS = "H"
+    DIAMONDS = "D"
+    CLUBS = "C"
+    SPADES = "S"
 
 
 class Rank(Enum):

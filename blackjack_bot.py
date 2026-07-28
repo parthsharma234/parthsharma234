@@ -24,6 +24,8 @@ EVENT_NAME = os.environ.get("EVENT_NAME", "issues")
 COMMENT_BODY = os.environ.get("COMMENT_BODY", "")
 ISSUE_TITLE = os.environ.get("ISSUE_TITLE", "")
 ISSUE_BODY = os.environ.get("ISSUE_BODY", "")
+EVENT_ACTOR = os.environ.get("EVENT_ACTOR", "")
+ISSUE_AUTHOR = os.environ.get("ISSUE_AUTHOR", "")
 
 
 def get_issue_comment() -> str:
@@ -199,6 +201,36 @@ def generate_hand_id() -> str:
     return secrets.token_hex(4)
 
 
+def finalize_hand(player: PlayerState, engine: BlackjackEngine, username: str) -> None:
+    """Persist a resolved hand, its audit record, and the dashboard."""
+    result = engine.state.player_hand.result
+    payout = engine.state.player_hand.payout
+    player.resolve_hand(payout, result)
+    player.save()
+
+    stats = StatsManager()
+    stats.record_hand(username, payout, player.current_streak)
+
+    if engine.state.shoe:
+        reveal = engine.state.shoe.reveal()
+        CompletedHand(
+            hand_id=engine.state.hand_id,
+            player=username,
+            bet=engine.state.bet,
+            player_cards=[c.to_dict() for c in engine.state.player_hand.cards],
+            dealer_cards=[c.to_dict() for c in engine.state.dealer_hand.cards],
+            player_value=engine.state.player_hand.value,
+            dealer_value=engine.state.dealer_hand.value,
+            result=result,
+            payout=payout,
+            nonce=reveal["nonce"],
+            commitment=engine.state.commitment,
+            timestamp=datetime.utcnow().isoformat(),
+        ).save()
+
+    update_readme()
+
+
 def update_readme(player: Optional[PlayerState] = None, last_hand: Optional[dict] = None) -> None:
     """Update README.md with current casino floor state."""
     readme_path = Path("README.md")
@@ -262,6 +294,49 @@ def update_readme(player: Optional[PlayerState] = None, last_hand: Optional[dict
     # Read current README
     with open(readme_path) as f:
         content = f.read()
+
+    casino_section = f"""<!-- BLACKJACK_CASINO_START -->
+## Neon Blackjack Casino
+
+<p align="center">
+  <a href="https://github.com/{REPO}/issues/new?title=blackjack&body=bet%3A+25"><img src="https://img.shields.io/badge/DEAL_ME_IN-25_CHIPS-ff2d95?style=for-the-badge&labelColor=15152b" alt="Deal me in" /></a>
+  <img src="https://img.shields.io/badge/SHOE-6_DECKS-00e5ff?style=for-the-badge&labelColor=15152b" alt="Six-deck shoe" />
+  <img src="https://img.shields.io/badge/PAYOUT-BLACKJACK_3:2-ffe66d?style=for-the-badge&labelColor=15152b" alt="Blackjack pays three to two" />
+</p>
+
+```text
++================================================================+
+| OPEN AN ISSUE: bet: 25  ->  COMMENT: HIT / STAND / DOUBLE      |
+| BETS: 25 / 50 / 100 / 250       STARTING STACK: 1,000 CHIPS    |
++================================================================+
+```
+
+### Leaderboard
+
+| Player | Chips | Streak | Hands Played |
+|--------|------:|-------:|-------------:|
+{leaderboard_table}
+
+### House Stats
+
+{house_stats}
+
+### Last Hand
+
+{last_hand_section}
+
+<details><summary><b>Rules + fair-deal audit</b></summary>
+
+- Dealer stands on all 17. Blackjack pays 3:2; double is allowed on your first two cards.
+- Every hand commits to its six-deck shoe before play and reveals the nonce and shoe when resolved.
+
+</details>
+<!-- BLACKJACK_CASINO_END -->"""
+    pattern = r"<!-- BLACKJACK_CASINO_START -->.*?<!-- BLACKJACK_CASINO_END -->"
+    content = re.sub(pattern, casino_section, content, flags=re.DOTALL)
+    with open(readme_path, "w") as f:
+        f.write(content)
+    return
     
     # Replace casino section
     casino_section = f"""<!-- BLACKJACK_CASINO_START -->
@@ -314,6 +389,9 @@ def main():
     text = get_issue_comment()
     username = get_username()
     comment_id = get_bot_comment_id()
+
+    if EVENT_NAME == "issue_comment" and EVENT_ACTOR != ISSUE_AUTHOR:
+        return
     
     # Load player state
     player = PlayerState.load(username)
@@ -340,43 +418,19 @@ def main():
         elif action == "stand":
             engine.stand()
         elif action == "double":
+            if player.chips < engine.state.bet:
+                response = render_hand_table(engine.state)
+                response += "\n\n⚠️ You need enough chips to cover the extra wager."
+                post_or_edit_comment(response, comment_id)
+                return
+            player.chips -= engine.state.bet
             engine.double()
         
         # Update player state
         player.active_hand = engine.state
         
         if engine.state.phase == "resolved":
-            # Hand complete - resolve
-            result = engine.state.player_hand.result
-            payout = engine.state.player_hand.payout
-            
-            player.resolve_hand(payout, result)
-            
-            # Record to stats
-            stats = StatsManager()
-            stats.record_hand(username, payout, player.current_streak)
-            
-            # Save completed hand
-            if engine.state.shoe:
-                reveal = engine.state.shoe.reveal()
-                hand = CompletedHand(
-                    hand_id=engine.state.hand_id,
-                    player=username,
-                    bet=engine.state.bet,
-                    player_cards=[c.to_dict() for c in engine.state.player_hand.cards],
-                    dealer_cards=[c.to_dict() for c in engine.state.dealer_hand.cards],
-                    player_value=engine.state.player_hand.value,
-                    dealer_value=engine.state.dealer_hand.value,
-                    result=result,
-                    payout=payout,
-                    nonce=reveal["nonce"],
-                    commitment=engine.state.commitment,
-                    timestamp=datetime.utcnow().isoformat(),
-                )
-                hand.save()
-            
-            # Update README
-            update_readme()
+            finalize_hand(player, engine, username)
             
             # Show final state with reveal
             response = render_hand_table(engine.state)
@@ -437,13 +491,18 @@ When your hand starts, comment HIT, STAND, or DOUBLE to play."""
         
         # Save player state
         player.start_hand(state, bet)
-        player.save()
+        if state.phase == "resolved":
+            finalize_hand(player, engine, username)
+        else:
+            player.save()
         
         # Render response
         response = render_hand_table(state)
-        response += "\n\n" + render_commitment(state)
+        response += "\n\n" + (render_reveal(state) if state.phase == "resolved" else render_commitment(state))
         
         post_or_edit_comment(response, comment_id)
+        if state.phase == "resolved":
+            close_issue()
 
 
 if __name__ == "__main__":

@@ -6,6 +6,10 @@ on:
   issue_comment:
     types: [created]
 
+permissions:
+  contents: write
+  issues: write
+
 concurrency:
   group: blackjack-${{ github.event.issue.number }}
   cancel-in-progress: false
@@ -38,13 +42,13 @@ jobs:
 
       - name: Check if blackjack game
         id: check
+        env:
+          TITLE: ${{ github.event.issue.title }}
+          BODY: ${{ github.event.issue.body }}
+          COMMENT: ${{ github.event.comment.body }}
         run: |
-          TITLE="${{ github.event.issue.title }}"
-          BODY="${{ github.event.issue.body }}"
-          COMMENT="${{ github.event.comment.body }}"
-          
           # Check for blackjack trigger words
-          if echo "$TITLE $BODY $COMMENT" | grep -qi "blackjack\|bet:"; then
+          if printf '%s\n%s\n%s\n' "$TITLE" "$BODY" "$COMMENT" | grep -qi "blackjack\|bet:"; then
             echo "is_game=true" >> $GITHUB_OUTPUT
           else
             echo "is_game=false" >> $GITHUB_OUTPUT
@@ -57,6 +61,8 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTOR: ${{ github.actor }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
           COMMENT_BODY: ${{ github.event.comment.body }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}

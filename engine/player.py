@@ -108,7 +108,9 @@ class PlayerState:
             return
         
         self.hands_played += 1
-        self.chips += payout
+        # The wager is held when a hand starts. `payout` is the net result,
+        # so return the wager as well (a zero payout is a push).
+        self.chips += self.active_hand.bet + payout
         
         if result == "win":
             self.wins += 1
