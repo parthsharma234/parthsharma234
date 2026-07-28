@@ -1,27 +1,35 @@
 <p align="center">
-  <img src="assets/signal-field.gif" alt="Animated abstract engineering signal field" width="100%" />
+  <img src="https://media1.giphy.com/media/lOF0rb0fdtGBOvgdO3/giphy.gif" alt="Drone in flight" width="520" />
 </p>
 
-# Parth Sharma
+<h1 align="center">Parth Sharma</h1>
 
-Computer Engineering student at Purdue building full-stack and embedded systems. I recently contributed to a magnetometer payload that flew on a NASA Student Launch rocket. My embedded-systems interests include on-device learning, multimodal sensor fusion, and real-time inference under memory and power constraints.
+<p align="center">
+  Computer Engineering at Purdue University &middot; Class of 2030<br />
+  <a href="https://linkedin.com/in/parth-h-sharma/">LinkedIn</a> &middot; <a href="mailto:sharma.parth.h@gmail.com">Email</a>
+</p>
 
-[LinkedIn](https://linkedin.com/in/parth-h-sharma/) &nbsp;&middot;&nbsp; [Email](mailto:sharma.parth.h@gmail.com)
+---
 
-## Selected work
+## Engineering focus
 
-### [Kelv](https://github.com/parthsharma234/kelv)
+I build systems that turn real-time signals into useful software. My work spans voice-interaction pipelines, event intelligence, and embedded instrumentation; most recently, I contributed to a magnetometer payload that flew on a NASA Student Launch rocket.
 
-A TypeScript interview-intelligence platform that combines real-time voice sessions with transcript, audio, and posture signals. Its processing pipeline produces per-question analytics and normalized session results, with Supabase-backed persistence and local fallback.
+I am especially interested in dependable embedded intelligence: on-device adaptation, multimodal sensor fusion, real-time inference, and hardware-software co-design under power and memory constraints.
 
-[Repository](https://github.com/parthsharma234/kelv)
+## Selected systems
 
-### [Scout](https://github.com/parthsharma234/nyu-hackathon)
-
-A Python and React intelligence pipeline that ingests source feeds, resolves entities, computes mention velocity and sentiment, and publishes ranked trend data plus source-health telemetry over REST and WebSockets.
-
-[Repository](https://github.com/parthsharma234/nyu-hackathon)
-
-## Focus
-
-Systems engineering, full-stack applications, and embedded intelligence. Purdue University, Computer Engineering, class of 2030.
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3><a href="https://github.com/parthsharma234/kelv">Kelv</a></h3>
+      <p>Voice-first interview intelligence system. It coordinates real-time ElevenLabs agents, in-browser audio and posture capture, role-aware prompt composition, per-question scoring, and normalized session persistence with Supabase and local recovery.</p>
+      <p><code>TypeScript</code> <code>React</code> <code>ElevenLabs</code> <code>Supabase</code></p>
+    </td>
+    <td width="50%" valign="top">
+      <h3><a href="https://github.com/parthsharma234/nyu-hackathon">Scout</a></h3>
+      <p>Event-intelligence pipeline. A Python ingestion and enrichment backend resolves entities across sources, calculates trend velocity, sentiment, and spike scores, then streams ranked entities and scraper-health telemetry to a React dashboard over REST and WebSockets.</p>
+      <p><code>Python</code> <code>React</code> <code>REST</code> <code>WebSockets</code></p>
+    </td>
+  </tr>
+</table>
