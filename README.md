@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/live-wires.gif" alt="Animated live data wires" width="900" />
+  <img src="assets/event-plane.gif" alt="Animated event-driven data plane" width="900" />
 </p>
 
 <h1 align="center">Parth Sharma</h1>
